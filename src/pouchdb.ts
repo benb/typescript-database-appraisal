@@ -45,14 +45,23 @@ export class PouchDBBench extends DBBench {
   }
 
   async getDocument(doi: string) {
-     
+    const result = await (this.db as any).find({selector: {"DOI": doi}, limit: 1}); 
+    if (result.warning) {
+      console.error(result.warning);
+    }
+    if (result.docs && result.docs.length > 0) {
+      return result.docs[0];
+    }
+    return null;
   }
 
   async getCount() {
     //this apparently isn't using the index
     //probably related to http://stackoverflow.com/questions/38497985/pouchdb-find-why-is-my-index-not-used
      const docs = await (this.db as any).find({selector: {"DOI": {"$exists": true}}});
-     console.error(docs.warning);
+     if (docs.warning) {
+       console.error(docs.warning);
+     }
      return docs.docs.length;
   }
 }
