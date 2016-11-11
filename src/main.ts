@@ -1,17 +1,21 @@
 import * as pouch from 'pouchdb';
 import * as fs from 'fs-extra-promise';
-import { Papermill } from '@readcube/api-client';
+import { CrossRefRecord } from './crossRefRecord';
 
-export interface PapermillJSON {
-  publications: {[uuid: string]: Papermill.Publication};
-  collections: [Papermill.Collection];
+interface TestData {
+  crossrefData: [any];
 }
 
 export abstract class DBBench {
-  papermill: PapermillJSON;
+  data: TestData;
+  size; number;
+  
+  constructor(size: number) {
+    this.size = size;
+  }
 
   async readPapermill() {
-    this.papermill = JSON.parse(await fs.readFileAsync('archive.papermill', 'utf8'))
+    this.data = JSON.parse(await fs.readFileAsync('testData.json', 'utf8'))
   }
 
   abstract async prepare();

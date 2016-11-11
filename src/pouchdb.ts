@@ -1,14 +1,15 @@
 import PouchDB = require('pouchdb');
-import { Papermill } from '@readcube/api-client';
 import * as fs from 'fs-extra-promise';
-import { DBBench, PapermillJSON } from './main';
+import { DBBench } from './main';
+import { CrossRefRecord } from './crossRefRecord';
+import * as UUID from 'uuid';
 
 
 export class PouchDBBench extends DBBench {
-  db: PouchDB.Database<Papermill.Publication>;
+  db: PouchDB.Database<CrossRefRecord>;
 
-  constructor() {
-    super();
+  constructor(size: number) {
+    super(size);
     this.db = new PouchDB('publications');
   }
 
@@ -18,10 +19,14 @@ export class PouchDBBench extends DBBench {
   }
 
   async loadDB() {
-    for (let uuid in this.papermill.publications) {
-      const pub:any = this.papermill.publications[uuid];
-      pub._id = pub.uuid;
-      await this.db.put(pub);
+    let c = 0;
+    for (let item of this.data.crossrefData) {
+      item._id = UUID.v1();
+      await this.db.put(item);
+      c++;
+      if (c >= this.size) {
+        break
+      }
     }
   }
 
