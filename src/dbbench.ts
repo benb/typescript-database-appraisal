@@ -27,7 +27,7 @@ export abstract class DBBench {
     this.tempDir = Temp.mkdirSync('dbbench');
   }
 
-  async readPapermill() {
+  async readSampleData() {
     this.data = JSON.parse(await fs.readFileAsync('testData.json', 'utf8'))
   }
 
@@ -41,23 +41,30 @@ export abstract class DBBench {
     const dois = take(this.data.crossrefData, this.size).map(x => x.DOI);
     fyShuffle(dois);
     for (let doi of dois) {
-      await this.getDocument(doi);
+      const doc = await this.getDocument(doi);
+      if (doc.DOI != doi) {
+        console.error("weird non-match: ", doc);
+      }
     }
   }
 
   async benchmark() { 
     let c = 0;
     await this.prepare();
-    await this.readPapermill();
+    await this.readSampleData();
+
     console.time('load');
     await this.loadDB();
     console.timeEnd('load');
+
     console.time('count');
     const count = await this.getCount();
     console.timeEnd('count');
+
     console.time('queries');
     await this.queries();
     console.timeEnd('queries');
+
     console.log("COUNT", count);
   }
 
