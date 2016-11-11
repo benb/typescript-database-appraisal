@@ -1,6 +1,6 @@
 import { PouchDBBench } from './pouchdb';
 import { NeDBBench } from './nedb';
-import { DBBench } from './main';
+import { DBBench } from './dbbench';
 
 async function runBenchmarks() {
   for (let count of [100, 1000, 10000]) {

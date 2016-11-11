@@ -1,21 +1,35 @@
 import PouchDB = require('pouchdb');
+const PouchFind = require('pouchdb-find');
 import * as fs from 'fs-extra-promise';
-import { DBBench } from './main';
+import { DBBench } from './dbbench';
 import { CrossRefRecord } from './crossRefRecord';
 import * as UUID from 'uuid';
-
 
 export class PouchDBBench extends DBBench {
   db: PouchDB.Database<CrossRefRecord>;
 
   constructor(size: number) {
     super(size);
+    PouchDB.plugin(PouchFind);
     this.db = new PouchDB('publications');
   }
 
   async prepare() {
     await this.db.destroy();
     this.db = new PouchDB('publications');
+    const db:any = this.db;
+    await db.createIndex({
+      index: {
+        fields: ['DOI']
+      }
+    });
+
+    return;
+  }
+
+
+  async cleanup() {
+    await this.db.destroy();
   }
 
   async loadDB() {
@@ -30,8 +44,15 @@ export class PouchDBBench extends DBBench {
     }
   }
 
+  async getDocument(doi: string) {
+     
+  }
+
   async getCount() {
-     const docs = await this.db.allDocs();
-     return docs.total_rows;
+    //this apparently isn't using the index
+    //probably related to http://stackoverflow.com/questions/38497985/pouchdb-find-why-is-my-index-not-used
+     const docs = await (this.db as any).find({selector: {"DOI": {"$exists": true}}});
+     console.error(docs.warning);
+     return docs.docs.length;
   }
 }

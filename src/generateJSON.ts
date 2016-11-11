@@ -48,8 +48,17 @@ async function save(items) {
     } catch (error) {
       console.error('WARNING', error);
     }
-    const uniqueEntries = new Set((existing['crossrefData'] || []).concat(items));
-    existing['crossrefData'] = Array.from(uniqueEntries);
+    const map = new Map();
+
+    for (let entry of existing['crossrefData']) {
+      map.set(entry.DOI, entry);
+    }
+
+    for (let entry of items) {
+      map.set(entry.DOI, entry);
+    }
+
+    existing['crossrefData'] = Array.from(map.values());
 
     await fs.writeFileAsync('testData.json', JSON.stringify(existing));
     console.log("Saved", items.length, "new items", "total now", existing['crossrefData'].length);

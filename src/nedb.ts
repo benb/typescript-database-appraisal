@@ -1,7 +1,7 @@
 import * as Datastore from 'nedb';
 import { promisify } from 'bluebird';
 import * as fs from 'fs-extra-promise';
-import { DBBench } from './main';
+import { DBBench } from './dbbench';
 import { CrossRefRecord } from './crossRefRecord';
 import * as UUID from 'uuid';
 
@@ -11,19 +11,26 @@ export class NeDBBench extends DBBench {
 
   constructor(size: number) {
     super(size);
-    this.db = new Datastore('./nedata');
+    console.log(this.tempDir + '/nedb');
+    this.db = new Datastore(this.tempDir + '/nedb');
   }
 
   async prepare() {
     await new Promise( (resolve, reject) => {
-      this.db.loadDatabase(function(err) {
+      this.db.loadDatabase((err) => {
         if (err) {
           reject(err);
         } else {
-          resolve();
+          this.db.ensureIndex({ fieldName: 'DOI', unique: true } , function (err) {
+            if (err) { reject(err); }
+            else { resolve(); }
+          });
         }
       });
     });
+  }
+
+  async cleanup() {
   }
 
   async insertItem(item: CrossRefRecord) {
@@ -45,6 +52,15 @@ export class NeDBBench extends DBBench {
         break
       }
     }
+  }
+
+  async getDocument(doi: string) {
+    return new Promise( (resolve, reject) => {
+      this.db.find({'DOI': doi}).limit(1).exec(function( err, docs) {
+        if (err) { reject(err) }
+        else { resolve(docs[0]) }
+      });
+    });
   }
 
   async getCount() {
