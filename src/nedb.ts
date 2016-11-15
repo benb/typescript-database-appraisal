@@ -11,8 +11,11 @@ export class NeDBBench extends DBBench {
 
   constructor(size: number) {
     super(size);
-    console.log(this.tempDir + '/nedb');
     this.db = new Datastore(this.tempDir + '/nedb');
+  }
+
+  static get niceName(){ 
+    return "NeDB";
   }
 
   async prepare() {
@@ -70,5 +73,23 @@ export class NeDBBench extends DBBench {
         else { resolve(c); }
       });
     });
+  }
+
+  async performUpdates() {
+    const docs:any = await new Promise( (resolve, reject) => {
+      this.db.find({}, (err, docs) => {
+        err ? reject(err) : resolve(docs);
+      });
+    });
+
+    for (let doc of docs) {
+      const p = new Promise( (res, rej) => {
+        this.db.update({DOI: doc.DOI}, {$set: {publisher: doc.publisher + "!"}}, function(err,numUpdated) {
+          if (err) {return rej(err);}
+          res(numUpdated);
+        });
+      });
+      await p;
+    }
   }
 }

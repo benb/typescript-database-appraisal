@@ -17,6 +17,8 @@
     "@types/pouchdb": "^5.4.28",
     "@types/request": "^0.0.33",
     "@types/request-promise": "^4.1.33",
+    "@types/sequelize": "^4.0.39",
+    "@types/sqlite3": "^2.2.31",
     "@types/temp": "^0.8.29",
     "@types/uuid": "^2.0.29",
     "bluebird": "^3.4.6",
@@ -26,9 +28,13 @@
     "nedb": "^1.8.0",
     "pouchdb": "^6.0.7",
     "pouchdb-find": "^0.10.3",
+    "reflect-metadata": "^0.1.8",
     "request": "^2.78.0",
     "request-promise": "^4.1.1",
+    "sequelize": "^3.25.0",
+    "sqlite3": "^3.1.8",
     "temp": "^0.8.3",
+    "typeorm": "^0.0.2-alpha.70",
     "uuid": "^2.0.3"
   }
 }

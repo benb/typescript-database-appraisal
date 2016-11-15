@@ -1,3 +1,6 @@
+require("reflect-metadata");
+import { Table, Column, PrimaryColumn } from "typeorm";
+
     export interface Indexed {
         'date-parts': number[][];
         'date-time': Date;
@@ -77,13 +80,60 @@
     }
 
     export interface CrossRefRecord {
+      'indexed': Indexed;
+      'reference-count': number;
+      'publisher': string;
+      'issue': string;
+      'content-domain': ContentDomain;
+      'short-container-title': string[];
+      'published-print': PublishedPrint;
+      'DOI': string;
+      'type': string;
+      'created': Created;
+      'page': string;
+      'source': string;
+      'title': string[];
+      'prefix': string;
+      'volume': string;
+      'author': Author[];
+      'member': string;
+      'published-online': PublishedOnline;
+      'container-title': string[];
+      'original-title': string[];
+      'deposited': Deposited;
+      'score': number;
+      'subtitle': string[];
+      'short-title': any[];
+      'issued': Issued;
+      'URL': string;
+      'ISSN': string[];
+      'subject': string[];
+      'license': License[];
+      'link': Link[];
+      'alternative-id': string[];
+      'update-policy': string;
+      'assertion': Assertion[];
+      'ISBN': string[];
+      'funder': Funder[];
+    }
+
+    @Table()
+    export class CrossRefSQLRecord implements CrossRefRecord {
+      constructor(data: CrossRefRecord) {
+        if (data) {
+          this.publisher = data.publisher;
+          this.DOI = data.DOI;
+        }
+      }
         'indexed': Indexed;
         'reference-count': number;
+        @Column()
         'publisher': string;
         'issue': string;
         'content-domain': ContentDomain;
         'short-container-title': string[];
         'published-print': PublishedPrint;
+        @PrimaryColumn()
         'DOI': string;
         'type': string;
         'created': Created;

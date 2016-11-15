@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+  <script type="text/javascript" src="https://d3js.org/d3.v4.js"></script>
+  <h1><i>n</i> Inserts</h1>
+  <svg width="960" height="500" class="loadTime"></svg>
+  <h1><i>n</i> Indexed queries from <i>n</i> entries</h1>
+  <svg width="960" height="500" class="queryTime"></svg>
+  <h1>Update <i>n</i> Text fields</h1>
+  <svg width="960" height="500" class="updateTime"></svg>
+
+  <script type="text/javascript">
+
+    d3.json("results.json", function(data) {
+
+      d3.selectAll("svg").each(function(d) {
+
+
+      let canvas = d3.select(this);
+      const dataSet = canvas.attr("class");
+      console.log(canvas);
+      console.log(dataSet);
+      let margin = {top: 20, right: 120, bottom: 50, left: 60},
+        width = parseInt(canvas.attr("width")) - margin.left - margin.right,
+        height = parseInt(canvas.attr("height")) - margin.top - margin.bottom,
+        g = canvas.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      const dbs = Object.keys(data);
+      let maxY = 0;
+      let maxX = 0;
+      let plotData = dbs.map(x=> {
+        const rawData = data[x][dataSet];
+        maxY = Math.max(maxY, ...data[x][dataSet].map(x => x.time));
+        maxX = Math.max(maxX, ...data[x][dataSet].map(x => parseInt(x.size)));
+          return {
+            name: x,
+            values: rawData
+          };
+        });
+
+      console.log(maxX);
+
+      const colours = {};
+
+      const c10 = d3.scaleOrdinal(d3.schemeCategory10);
+      for (let i in dbs) {
+        colours[dbs[i]]=c10(i);
+      }
+ 
+      let x = d3.scaleLinear()
+        .domain([0,maxX])
+        .rangeRound([0,width]);
+
+      let y = d3.scaleLinear()
+        .domain([0,maxY])
+        .rangeRound([height,0]);
+
+      g.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+      g.append("text")
+        .attr("transform", "translate(" + (width / 2) + "," + (height + 35) +  ")")
+        .style("font", "14px")
+        .style("font-style", "italic")
+        .text("n")
+
+
+
+      g.append("g")
+        .attr("class", "axis axis--y")
+        .call(d3.axisLeft(y))
+
+      var line = d3.line()
+        .x((d,i) => {console.log("X", x(d.size)); return x(parseInt(d.size));})
+        .y((d,i) => {console.log("Y", y(d.time)); return y(parseFloat(d.time));});
+
+
+      let db = g.selectAll('.db')
+        .data(plotData)
+        .enter().append("g")
+        .attr("class", "db");
+
+        db.append("path")
+        .attr("d", (d) => {console.log("D", d); return line(d.values);})
+        .attr("fill", "none")
+        .attr("stroke", d => colours[d.name])
+        .attr("stroke-width", 3);
+
+        db.append("text")
+          .datum(d => { return {name: d.name, value: d.values[d.values.length - 1]}})
+          .attr("transform", function(d) { return "translate(" + x(d.value.size) + "," + y(d.value.time) + ")"; })
+          .attr("x", 3)
+          .attr("dy", "0.35em")
+          .style("font", "10px sans-serif")
+          .text(d => d.name);
+
+      });
+
+
+    });
+
+    </script>
